@@ -5,11 +5,8 @@
 <title>Signal Jammer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
+/* ===== BODY ===== */
 body{margin:0;background:#0b0f1a;font-family:Arial,sans-serif;overflow:hidden;color:#fff;}
-
-/* ===== CENTER TITLE ===== */
-#gameTitleCenter{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(1);font-size:56px;letter-spacing:6px;font-weight:bold;pointer-events:none;z-index:15;animation:titleDisappear 4s ease forwards;}
-@keyframes titleDisappear{0%{transform:translate(-50%,-50%) scale(1);}100%{transform:translate(-50%,-50%) scale(0);}}
 
 /* ===== HUD ===== */
 #topHud{position:fixed;top:12px;left:50%;transform:translateX(-50%);display:flex;gap:28px;background:rgba(0,0,0,0.45);padding:10px 20px;border-radius:16px;backdrop-filter:blur(6px);z-index:10;transition:opacity 0.5s;}
@@ -21,9 +18,9 @@ body{margin:0;background:#0b0f1a;font-family:Arial,sans-serif;overflow:hidden;co
 .progress{width:90px;height:5px;background:#222;border-radius:4px;overflow:hidden;margin-top:5px;}
 .progressBar{height:100%;width:0%;background:linear-gradient(90deg,#00eaff,#00ffa2);transition:width 0.3s ease;}
 
-/* ===== LIFE HEARTS ===== */
+/* ===== LIVES ===== */
 #lives{position:fixed;top:12px;right:12px;display:flex;align-items:center;gap:6px;z-index:10;font-weight:bold;font-size:18px;transition:opacity 0.5s;}
-.heart{width:18px;height:18px;background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 29.6"><path fill="%23FF0000" d="M23.6,0c-2.7,0-5.1,1.6-6.6,4C15.5,1.6,13.1,0,10.4,0C4.7,0,0,4.7,0,10.4c0,5.8,5.4,11,13.6,18.8l2.8,2.5l2.8-2.5C26.6,21.4,32,16.2,32,10.4C32,4.7,27.3,0,23.6,0z"/></svg>') no-repeat center center;background-size:contain;transition:transform 0.3s ease;}
+.heart{width:18px;height:18px;background:url('logo.png') no-repeat center center;background-size:contain;transition:transform 0.3s ease;}
 .extraLives{color:#00eaff;font-size:16px;margin-left:4px;}
 
 /* ===== CORE ===== */
@@ -32,11 +29,6 @@ body{margin:0;background:#0b0f1a;font-family:Arial,sans-serif;overflow:hidden;co
 /* ===== SIGNAL BALL ===== */
 .signal{position:absolute;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #7fffff,#00eaff 60%,#0088aa);box-shadow:0 0 6px rgba(0,234,255,0.8),0 0 14px rgba(0,234,255,0.6),0 0 26px rgba(0,234,255,0.4);cursor:pointer;transition:transform 0.15s ease;}
 .signal:hover{transform:scale(1.15);}
-
-/* ===== LEVEL TRANSITION ===== */
-#levelOverlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(11,15,26,0.55);opacity:0;pointer-events:none;z-index:20;transition:opacity 0.4s ease;}
-#levelOverlay.show{opacity:1;}
-#levelText{font-size:48px;letter-spacing:4px;transform:scale(0.85);text-shadow:0 0 20px rgba(0,234,255,0.8);}
 
 /* ===== GAME OVER ===== */
 #gameover{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);text-align:center;padding-top:30vh;z-index:30;}
@@ -51,10 +43,43 @@ button{padding:12px 24px;font-size:16px;cursor:pointer;}
 #rocket{width:60px;height:100px;background:linear-gradient(#ff0,#ff4500);clip-path:polygon(50% 0%,65% 25%,65% 70%,50% 100%,35% 70%,35% 25%);position:relative;box-shadow:0 0 20px #ff0;transform:translateY(100vh);}
 .firework{position:absolute;width:6px;height:6px;background:radial-gradient(circle,#fff,#0ff);border-radius:50%;pointer-events:none;opacity:1;}
 </style>
+
+<!-- ===== GameMonetize SDK ===== -->
+<script type="text/javascript">
+window.SDK_OPTIONS = {
+   gameId: "32oiqqug8dusinko5wn9xrfcmnxgyk00",
+   onEvent: function (a) {
+      switch (a.name) {
+         case "SDK_GAME_PAUSE":
+            paused = true;
+            document.querySelectorAll("audio").forEach(audio => audio.muted = true);
+            break;
+         case "SDK_GAME_START":
+            paused = false;
+            document.querySelectorAll("audio").forEach(audio => audio.muted = false);
+            break;
+         case "SDK_READY":
+            console.log("GameMonetize SDK ready");
+            // Optionally show a banner ad when SDK is ready
+            if (typeof sdk !== 'undefined' && typeof sdk.showBanner !== 'undefined') {
+                sdk.showBanner();
+            }
+            break;
+      }
+   }
+};
+(function (a, b, c) {
+   var d = a.getElementsByTagName(b)[0];
+   if (!a.getElementById(c)) {
+      a = a.createElement(b);
+      a.id = c;
+      a.src = "https://api.gamemonetize.com/sdk.js";
+      d.parentNode.insertBefore(a, d);
+   }
+})(document, "script", "gamemonetize-sdk");
+</script>
 </head>
 <body>
-
-<div id="gameTitleCenter">SIGNAL&nbsp;JAMMER</div>
 
 <div id="topHud">
   <div class="hudItem"><div class="label">LEVEL</div><div class="value" id="level">01</div></div>
@@ -65,140 +90,43 @@ button{padding:12px 24px;font-size:16px;cursor:pointer;}
 <div id="lives"></div>
 <div id="core"></div>
 <div id="levelOverlay"><div id="levelText">LEVEL</div></div>
-
-<div id="premiumOverlay">
-  <div id="rocket"></div>
-</div>
-
+<div id="premiumOverlay"><div id="rocket"></div></div>
 <div id="gameover">
 <h1>CORE OVERLOADED</h1>
 <p>Final Score: <span id="finalScore"></span></p>
 <p>Level Reached: <span id="finalLevel"></span></p>
 <button onclick="location.reload()">Restart</button>
 </div>
-
 <audio id="catchSound"><source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
 
 <script>
 let score=0,level=1,combo=0,coreHits=0,paused=false,lives=1;
 let speed=0.6,spawnDelay=1200;
-
-const scoreEl=document.getElementById("score"),
-levelEl=document.getElementById("level"),
-comboEl=document.getElementById("combo"),
-barEl=document.getElementById("bar"),
-livesEl=document.getElementById("lives"),
-overlay=document.getElementById("levelOverlay"),
-levelText=document.getElementById("levelText"),
-premiumOverlay=document.getElementById("premiumOverlay"),
-rocket=document.getElementById("rocket"),
-gameOverEl=document.getElementById("gameover"),
-finalScoreEl=document.getElementById("finalScore"),
-finalLevelEl=document.getElementById("finalLevel"),
-sound=document.getElementById("catchSound");
-
+const scoreEl=document.getElementById("score"),levelEl=document.getElementById("level"),comboEl=document.getElementById("combo"),barEl=document.getElementById("bar"),livesEl=document.getElementById("lives"),overlay=document.getElementById("levelOverlay"),levelText=document.getElementById("levelText"),premiumOverlay=document.getElementById("premiumOverlay"),rocket=document.getElementById("rocket"),gameOverEl=document.getElementById("gameover"),finalScoreEl=document.getElementById("finalScore"),finalLevelEl=document.getElementById("finalLevel"),sound=document.getElementById("catchSound");
 const cx=()=>innerWidth/2,cy=()=>innerHeight/2;
 
-function animate(el){ el.classList.add("animate"); setTimeout(()=>el.classList.remove("animate"),200); }
-function formatScore(n){ return n.toString().padStart(5,'0'); }
-function formatLevel(n){ return n.toString().padStart(2,'0'); }
-function levelTarget(){ return level*10; }
-function updateProgress(){ barEl.style.width=Math.min(100,(score/levelTarget())*100)+"%"; }
+function animate(el){el.classList.add("animate");setTimeout(()=>el.classList.remove("animate"),200);}
+function formatScore(n){return n.toString().padStart(5,'0');}
+function formatLevel(n){return n.toString().padStart(2,'0');}
+function levelTarget(){return level*10;}
+function updateProgress(){barEl.style.width=Math.min(100,(score/levelTarget())*100)+"%";}
 
-function setupLives(){
-  livesEl.innerHTML="";
-  let displayCount=Math.min(lives,3);
-  for(let i=0;i<displayCount;i++){ const h=document.createElement("div"); h.className="heart"; livesEl.appendChild(h); }
-  if(lives>3){ const extra=document.createElement("div"); extra.className="extraLives"; extra.textContent="+"+(lives-3); livesEl.appendChild(extra);}
-}
+function setupLives(){livesEl.innerHTML="";let displayCount=Math.min(lives,3);for(let i=0;i<displayCount;i++){const h=document.createElement("div");h.className="heart";livesEl.appendChild(h);}if(lives>3){const extra=document.createElement("div");extra.className="extraLives";extra.textContent="+"+(lives-3);livesEl.appendChild(extra);}}
+function spawnHeartParticles(el){const rect=el.getBoundingClientRect();for(let i=0;i<12;i++){const p=document.createElement("div");p.className="particle";document.body.appendChild(p);p.style.left=rect.left+rect.width/2+"px";p.style.top=rect.top+rect.height/2+"px";const angle=Math.random()*2*Math.PI,dist=Math.random()*60+20;p.style.transform=`translate(${Math.cos(angle)*dist}px,${Math.sin(angle)*dist}px) scale(0) rotate(${Math.random()*360}deg)`;setTimeout(()=>{p.remove();},800);}}
+function loseLife(){const heart=livesEl.querySelector(".heart:not(.broken)");if(heart){heart.classList.add("broken");spawnHeartParticles(heart);lives--;}coreHits=0;if(lives<=0){endGame();}}
+function showLevelUp(){paused=true;overlay.classList.add("show");levelText.textContent="LEVEL "+formatLevel(level);setTimeout(()=>{overlay.classList.remove("show");paused=false;},900);}
 
-function spawnHeartParticles(el){
-  const rect=el.getBoundingClientRect();
-  for(let i=0;i<12;i++){
-    const p=document.createElement("div"); p.className="particle"; document.body.appendChild(p);
-    p.style.left=rect.left+rect.width/2+"px";
-    p.style.top=rect.top+rect.height/2+"px";
-    const angle=Math.random()*2*Math.PI,dist=Math.random()*60+20;
-    p.style.transform=`translate(${Math.cos(angle)*dist}px,${Math.sin(angle)*dist}px) scale(0) rotate(${Math.random()*360}deg)`;
-    setTimeout(()=>{ p.remove(); },800);
-  }
-}
+function premiumLevelAnimation(callback){paused=true;document.getElementById("topHud").style.opacity="0.4";livesEl.style.opacity="0.4";premiumOverlay.classList.add("show");rocket.style.transform="translateY(100vh)";setTimeout(()=>{rocket.style.transition="transform 2s cubic-bezier(0.5,0,0.5,1)";rocket.style.transform="translateY(-200px)";createFireworks();},50);setTimeout(()=>{premiumOverlay.classList.remove("show");rocket.style.transition="none";rocket.style.transform="translateY(100vh)";document.getElementById("topHud").style.opacity="1";livesEl.style.opacity="1";paused=false;callback();},2500);}
+function createFireworks(){for(let i=0;i<30;i++){const f=document.createElement("div");f.className="firework";premiumOverlay.appendChild(f);const angle=Math.random()*2*Math.PI,dist=Math.random()*200+50;f.style.left=cx()+"px";f.style.top=cy()+"px";f.style.transform=`translate(${Math.cos(angle)*dist}px,${Math.sin(angle)*dist}px)`;f.style.transition="transform 1s ease-out, opacity 1s ease-out";f.style.opacity="0";setTimeout(()=>{f.remove();},1000);}}
 
-function loseLife(){
-  const heart=livesEl.querySelector(".heart:not(.broken)");
-  if(heart){ heart.classList.add("broken"); spawnHeartParticles(heart); lives--; }
-  coreHits=0; if(lives<=0){ endGame(); }
-}
+function spawnSignal(){if(paused) return;const s=document.createElement("div");s.className="signal";const angle=Math.random()*Math.PI*2,dist=Math.max(innerWidth,innerHeight)/2+60;let x=cx()+Math.cos(angle)*dist,y=cy()+Math.sin(angle)*dist;s.style.left=x+"px";s.style.top=y+"px";document.body.appendChild(s);s.onclick=()=>{combo++;score+=combo;sound.currentTime=0;sound.play();scoreEl.textContent=formatScore(score);comboEl.textContent=combo;animate(scoreEl);animate(comboEl);updateProgress();s.remove();if(score>=levelTarget()){level++;speed+=0.12;spawnDelay=Math.max(350,spawnDelay-35);levelEl.textContent=formatLevel(level);animate(levelEl);barEl.style.width="0%";lives=level;setupLives();if(level%5===0){premiumLevelAnimation(()=>{});}else{showLevelUp();}}};const move=setInterval(()=>{if(paused)return;x+=(cx()-x)*0.01*speed;y+=(cy()-y)*0.01*speed;s.style.left=x+"px";s.style.top=y+"px";if(Math.hypot(x-cx(),y-cy())<30){clearInterval(move);s.remove();combo=0;comboEl.textContent=combo;coreHits++;if(coreHits>=level*10){loseLife();}}},16);}
 
-function showLevelUp(){ paused=true; overlay.classList.add("show"); levelText.textContent="LEVEL "+formatLevel(level);
-  setTimeout(()=>{ overlay.classList.remove("show"); paused=false; },900);
-}
-
-/* ===== PREMIUM 5-LEVEL ANIMATION ===== */
-function premiumLevelAnimation(callback){
-  paused=true;
-  document.getElementById("topHud").style.opacity="0.4";
-  livesEl.style.opacity="0.4";
-  premiumOverlay.classList.add("show");
-  rocket.style.transform="translateY(100vh)";
-  setTimeout(()=>{ rocket.style.transition="transform 2s cubic-bezier(0.5,0,0.5,1)"; rocket.style.transform="translateY(-200px)"; createFireworks(); },50);
-  setTimeout(()=>{
-    premiumOverlay.classList.remove("show");
-    rocket.style.transition="none";
-    rocket.style.transform="translateY(100vh)";
-    document.getElementById("topHud").style.opacity="1";
-    livesEl.style.opacity="1";
-    paused=false; callback();
-  },2500);
-}
-
-function createFireworks(){
-  for(let i=0;i<30;i++){
-    const f=document.createElement("div"); f.className="firework"; premiumOverlay.appendChild(f);
-    const angle=Math.random()*2*Math.PI, dist=Math.random()*200+50;
-    f.style.left=cx()+"px"; f.style.top=cy()+"px";
-    f.style.transform=`translate(${Math.cos(angle)*dist}px,${Math.sin(angle)*dist}px)`;
-    f.style.transition="transform 1s ease-out, opacity 1s ease-out";
-    f.style.opacity="0"; 
-    setTimeout(()=>{ f.remove(); },1000);
-  }
-}
-
-function spawnSignal(){
-  if(paused) return;
-  const s=document.createElement("div"); s.className="signal";
-  const angle=Math.random()*Math.PI*2,dist=Math.max(innerWidth,innerHeight)/2+60;
-  let x=cx()+Math.cos(angle)*dist,y=cy()+Math.sin(angle)*dist;
-  s.style.left=x+"px"; s.style.top=y+"px"; document.body.appendChild(s);
-  s.onclick=()=>{
-    combo++; score+=combo; sound.currentTime=0; sound.play();
-    scoreEl.textContent=formatScore(score); comboEl.textContent=combo;
-    animate(scoreEl); animate(comboEl); updateProgress(); s.remove();
-    if(score>=levelTarget()){
-      level++; speed+=0.12; spawnDelay=Math.max(350,spawnDelay-35);
-      levelEl.textContent=formatLevel(level); animate(levelEl); barEl.style.width="0%";
-      lives=level; setupLives();
-      if(level%5===0){ premiumLevelAnimation(()=>{}); } else { showLevelUp(); }
-    }
-  };
-  const move=setInterval(()=>{
-    if(paused) return;
-    x+=(cx()-x)*0.01*speed; y+=(cy()-y)*0.01*speed;
-    s.style.left=x+"px"; s.style.top=y+"px";
-    if(Math.hypot(x-cx(),y-cy())<30){ clearInterval(move); s.remove(); combo=0; comboEl.textContent=combo;
-      coreHits++; if(coreHits>=level*10){ loseLife(); }
-    }
-  },16);
-}
-
-function endGame(){ document.querySelectorAll(".signal").forEach(e=>e.remove());
-  finalScoreEl.textContent=score; finalLevelEl.textContent=level; gameOverEl.style.display="block";
-}
+function endGame(){document.querySelectorAll(".signal").forEach(e=>e.remove());finalScoreEl.textContent=score;finalLevelEl.textContent=level;gameOverEl.style.display="block";}
 
 /* START GAME */
-updateProgress(); lives=1; setupLives();
-setTimeout(()=>{ loop(); },1000);
-function loop(){ spawnSignal(); setTimeout(loop,spawnDelay); }
+updateProgress();lives=1;setupLives();
+setTimeout(()=>{loop();},1000);
+function loop(){spawnSignal();setTimeout(loop,spawnDelay);}
 </script>
 </body>
 </html>
